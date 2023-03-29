@@ -24,12 +24,7 @@ struct Circle {
 }
 
 impl Circle {
-    fn new(
-        x: f32,
-        y: f32, 
-        radius: f32, 
-        color: Color,
-    ) -> Self {
+    fn new(x: f32, y: f32, radius: f32, color: Color) -> Self {
         Circle {
             px: x,
             py: y,
@@ -73,6 +68,42 @@ impl Circle {
     }
 }
 
+struct Planet {
+    mass: f32,
+    radius: f32,
+    texture: Circle,
+}
+
+impl Planet {
+    fn new(mass: f32, radius: f32, texture: Circle) -> Self {
+        Planet {
+            mass,
+            radius,
+            texture,
+        }
+    }
+}
+
+struct SolarSystem {
+    planets: Vec<Planet>,
+}
+
+impl SolarSystem {
+    fn new() -> Self {
+        SolarSystem { planets: vec![] }
+    }
+
+    fn render(&mut self, fps: f32) {
+        for planet in self.planets.into_iter() {
+            planet.texture.render();
+        }
+    }
+
+    fn create_planet(&mut self, planet: Planet) {
+        self.planets.push(planet);
+    }
+}
+
 #[macroquad::main("gravity")]
 async fn main() {
     // let mut c = Circle::new(10.0, 10.0, 10.0, RED);
@@ -86,14 +117,14 @@ async fn main() {
         screen_width() / 2.0 + 15.0,
         screen_height() / 2.0 + 15.0,
         EARTH_RADIUS / KILOMETERS_PER_PIXEL as f32,
-        BLUE
+        BLUE,
     );
 
     let mut moon = Circle::new(
         earth.px,
         earth.py - (earth.radius + EARTH_MOON_DISTANCE / KILOMETERS_PER_PIXEL as f32),
         MOON_RADIUS / KILOMETERS_PER_PIXEL as f32,
-        WHITE
+        WHITE,
     );
 
     let fg = (G * MOON_MASS * EARTH_MASS) / EARTH_MOON_DISTANCE.powf(2.0) as f32;
@@ -108,10 +139,7 @@ async fn main() {
         let dist = ((earth.px - moon.px).powf(2.0) + (earth.py - moon.py).powf(2.0)).sqrt();
         let fg = (G * MOON_MASS * EARTH_MASS) / dist / 1.0E12;
 
-        moon.set_acceleration(
-            0.0,
-            fg / MOON_MASS / get_fps() as f32,
-        );
+        moon.set_acceleration(0.0, fg / MOON_MASS / get_fps() as f32);
 
         earth.render();
         moon.render();
@@ -119,3 +147,4 @@ async fn main() {
         next_frame().await
     }
 }
+
